@@ -2,8 +2,10 @@
 library(tidyverse)
 library(here)
 
+#read data
 data_raw <- readxl::read_xlsx("/Users/carlpearson/Documents/Kubernetes/Data/Excel/Kubernetes Research Survey.xlsx")
 
+#clean multiselect data
 #job function
 colnames(data_raw)[13:35] <- paste0("job_function_",as.character(data_raw[1,c(13:35)]))
 
@@ -27,9 +29,11 @@ colnames(data_raw)[43] = "number_of_machines"
 colnames(data_raw)[78] = "other_solutions"
 
 
-df <- data_raw %>%
-  rename(
+data_clean <- data_raw %>%
+  rename( #rename variables
+    id="Respondent ID",
     location="What is your geographic location?",
+    org_type="Does your organization fall under any of these categories?"   ,
     company_size="What is the size of your company/organization?",
     role= "Which of these best describes your role?"  ,
     role_other_text = "...37",
@@ -42,12 +46,12 @@ df <- data_raw %>%
     follow_up = "Would it be ok for someone from the open source community to follow up with you about your responses? If so, please provide your name and email. They will be used solely for follow up.",
     email = "...87"
   ) %>%
-  select(
+  select( #remove personal data
     -"IP Address",
     -follow_up,
     -email
   )
 
-df <- df[2:nrow(df),]
+data_clean <- data_clean[2:nrow(data_clean),] #remove first line containing header info
 
-write_csv(df,here("data_cleaned.csv"))
+write_csv(data_clean,here("data_cleaned.csv")) #write data
