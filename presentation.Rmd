@@ -1,3 +1,11 @@
+---
+title: "Kubernetes Sig-Usability Survey"
+author: "Carl J. Pearson"
+date: "8/11/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
 library(tidyverse)
 library(here)
 library(ggthemes)
@@ -24,44 +32,58 @@ df <- df %>%
     ))
     
   )
+```
 
-#location
+## Sig Usability Survey
+
+Background
+
+## Location of respondents
+
+```{r location,echo=F}
 df %>%
   ggplot(aes(location,fill=location)) +
   geom_bar() +
   geom_text(stat='count',aes(label=..count..),vjust=-.5,size=4.5) +
   coord_cartesian(ylim=c(0,60)) +
   #labels
-  labs(title="Number of respondents by location"
-       ) +
   #theming
   theme(
     axis.ticks.y = element_blank(),
     axis.text.y = element_blank(),
     axis.text = element_text(size=12),
     axis.title = element_blank(),
+    plot.title = element_blank(),
     legend.position = "none"
     )+
   scale_x_discrete(labels = wrap_format(20)) +
   scale_fill_manual(values = rep("royalblue",50))
+```
 
+
+## Organization type of respondents
+
+```{r org,echo=F}
 #org type
 df %>%
   ggplot(aes(org_type,fill=org_type)) +
   geom_bar() +
   geom_text(stat='count',aes(label=..count..),vjust=-.5,size=4.5) +
   coord_cartesian(ylim=c(0,80)) +
-  labs(title="Organization type of respondents"
-  ) +
   theme(
     axis.ticks.y = element_blank(),
     axis.text.y = element_blank(),
     axis.text = element_text(size=12),
     axis.title = element_blank(),
+    plot.title = element_blank(),
     legend.position = "none")+
   scale_fill_manual(values = rep("royalblue",50))
+```
 
-#job function
+## Job functions
+
+```{r job,echo=F, message=F}
+
 df %>%
   select(contains("job_function"),id) %>%
   pivot_longer(-id) %>%
@@ -72,54 +94,68 @@ df %>%
   geom_text(aes(label=n),hjust=-.3,size=3.5) +
   coord_cartesian(xlim=c(0,60)) +
   coord_flip() +
-  labs(title="Job functions of respondents"
-  ) +
   theme(
     axis.ticks.x = element_blank(),
     axis.text.x = element_blank(),
     axis.text = element_text(size=10),
     axis.title = element_blank(),
+    plot.title = element_blank(),
     legend.position = "none") +
   scale_fill_manual(values = rep("royalblue",50))
+```
 
-#role
+## Role
+
+```{r role,echo=F, message=F}
+
 df %>%
   count(role) %>%
-  ggplot(aes(x=reorder(role,n),y=n)) +
+  drop_na(role) %>%
+  ggplot(aes(x=reorder(role,n),y=n,fill="place")) +
   geom_bar(stat='identity') +
   geom_text(aes(label=n),hjust=-.3,size=3.5) +
   coord_cartesian(xlim=c(0,60)) +
   coord_flip() +
-  labs(title="Job functions of respondents"
-  ) +
   theme(
     axis.ticks.x = element_blank(),
     axis.text.x = element_blank(),
     axis.text = element_text(size=10),
-    axis.title = element_blank())
+    axis.title = element_blank(),
+    legend.position = "none")+
+  scale_fill_manual(values = rep("royalblue",50))
 
-#job function + role
+```
+
+Other responses: Pre-Sales SE, Architect, Software Engineer
+
+## Role by Job function
+
+```{r role by job,echo=F, message=F}
+
 df %>%
   select(contains("job_function"),id,role) %>%
   pivot_longer(contains("job_function")) %>%
-  drop_na(value) %>%
+  drop_na(value,name,role) %>%
   group_by(role) %>%
   count(value) %>%
   ggplot(aes(x=reorder(value,n),y=n,fill=role)) +
   geom_bar(stat='identity') +
 #  geom_text(aes(label=n),hjust=-.3,size=3.5) +
   coord_flip() +
-
-  labs(title="Job functions of respondents"
-  ) +
   theme(
     #axis.ticks.x = element_blank(),
     #axis.text.x = element_blank(),
     axis.text = element_text(size=10),
-    axis.title = element_blank())
+    axis.title = element_blank(),
+    legend.position = c(0.8, 0.4)) +
+  scale_fill_futurama() 
 
+```
 
-#data_center
+## Data center
+
+```{r datacenter,echo=F, message=F}
+
 df %>%
   select(contains("data_center"),id) %>%
   pivot_longer(-id) %>%
@@ -140,7 +176,12 @@ df %>%
     legend.position = "none") +
   scale_fill_manual(values = rep("royalblue",50))
 
-#number of machines
+```
+
+## Number of machines
+
+```{r numberofmachines,echo=F, message=F,warning=F}
+
 df %>%
   count(number_of_machines) %>%
   drop_na(number_of_machines) %>%
@@ -159,7 +200,12 @@ df %>%
     legend.position = "none") +
   scale_fill_manual(values = rep("royalblue",50))
 
-#activities
+```
+
+
+## Activities
+
+```{r activities,echo=F, message=F}
 
 df %>%
   select(id,contains("activities_")) %>%
@@ -171,14 +217,18 @@ df %>%
   group_by(name,value,total) %>%
   count() %>%
   mutate(prop=n/total) %>%
-  ggplot(aes(x=name,y=prop,fill=value)) +
+  ggplot(aes(x=reorder(name,n),y=prop,fill=value)) +
   geom_bar(stat='identity',position = "stack") +
   coord_flip() +
   scale_fill_futurama() +
   labs(x="",y="Proportion") +
   scale_x_discrete(labels = wrap_format(30))
 
-#container use
+```
+
+## Container adoption
+
+```{r containers,echo=F, message=F}
 
 df %>%
   select(id,contains("container_")) %>%
@@ -186,20 +236,27 @@ df %>%
   mutate(name=gsub("container_","",name)) %>%
   drop_na(value) %>%
   group_by(name) %>%
-  mutate(total=n(),
-         value=factor(value,levels = c("Used in the past","Currently using","Future plans","N/A"))) %>%
+  mutate(total=n()) %>%
+  ungroup() %>%
+  mutate(
+         value=factor(value,levels = c("Used in the past","Currently using","Future plans","N/A")),
+         name=factor(name,levels = c("Proof of concept","Development","Test","Production"))
+         ) %>%
   group_by(name,value,total) %>%
   count() %>%
   mutate(prop=n/total) %>%
   ggplot(aes(x=name,y=prop,fill=value)) +
-  geom_bar(stat='identity',position = "stack") +
+  geom_bar(stat='identity',position = "dodge") +
   coord_flip() +
   scale_fill_futurama() +
   labs(x="",y="Proportion") +
   scale_x_discrete(labels = wrap_format(30))
 
-#kubernetes use
+```
 
+## kubernetes adoption
+
+```{r kubernetes,echo=F, message=F}
 
 df %>%
   select(id,contains("kubernetes_")) %>%
@@ -215,12 +272,16 @@ df %>%
          name=factor(name,levels = c("Proof of concept","Development","Test","Production"))) %>%
   filter(name!="Other (please specify)") %>% #removed other response
   ggplot(aes(x=name,y=prop,fill=value)) +
-  geom_bar(stat='identity',position = "stack") +
+  geom_bar(stat='identity',position = "dodge") +
   coord_flip() +
   scale_fill_futurama() +
   labs(x="",y="Proportion") 
 
-#learn
+```
+
+## Learning sources
+
+```{r learn,echo=F, message=F}
 
 df %>%
   select(id,contains("learn_")) %>%
@@ -243,7 +304,19 @@ df %>%
     legend.position = "none") +
   scale_fill_manual(values = rep("royalblue",50))
 
-#nps
+```
+
+## Learning sources: other
+
+```{r learn2,echo=F, message=F}
+
+df$`learn_Other (please specify)` %>% as.vector() %>% na.omit()
+
+```
+
+## NPS
+
+```{r nps,echo=F, message=F, warning=F}
 
 df_nps <- df %>%
   mutate(NPS_Categories = case_when(
@@ -274,4 +347,6 @@ df %>%
   scale_x_continuous(breaks=seq(0,10,1), limits=c(-0.5,10.5)) +
   labs(y="Count",x="") +
   annotate("text", x = 2, y = 30, label = paste0("NPS score is ",nps_value))
+
+```
 
