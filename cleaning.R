@@ -16,7 +16,7 @@ colnames(data_raw)[39:42] <- paste0("data_center_",as.character(data_raw[1,c(39:
 colnames(data_raw)[44:55] <- paste0("activities_",as.character(data_raw[1,c(44:55)]))
 
 #containers
-colnames(data_raw)[56:59] <- paste0("container",as.character(data_raw[1,c(56:59)]))
+colnames(data_raw)[56:59] <- paste0("container_",as.character(data_raw[1,c(56:59)]))
 
 #kubernetes
 colnames(data_raw)[60:64] <- paste0("kubernetes_",as.character(data_raw[1,c(60:64)]))
@@ -55,3 +55,4 @@ data_clean <- data_raw %>%
 data_clean <- data_clean[2:nrow(data_clean),] #remove first line containing header info
 
 write_csv(data_clean,here("data_cleaned.csv")) #write data
+

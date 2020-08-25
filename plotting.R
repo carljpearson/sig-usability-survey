@@ -32,18 +32,21 @@ df %>%
   geom_text(stat='count',aes(label=..count..),vjust=-.5,size=4.5) +
   coord_cartesian(ylim=c(0,60)) +
   #labels
-  labs(title="Number of respondents by location"
-       ) +
   #theming
   theme(
     axis.ticks.y = element_blank(),
     axis.text.y = element_blank(),
     axis.text = element_text(size=12),
     axis.title = element_blank(),
+    plot.title = element_blank(),
     legend.position = "none"
-    )+
+  )+
   scale_x_discrete(labels = wrap_format(20)) +
   scale_fill_manual(values = rep("royalblue",50))
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/location.png",device = "png",width=7,height=4,bg="transparent")
+
+
 
 #org type
 df %>%
@@ -51,15 +54,15 @@ df %>%
   geom_bar() +
   geom_text(stat='count',aes(label=..count..),vjust=-.5,size=4.5) +
   coord_cartesian(ylim=c(0,80)) +
-  labs(title="Organization type of respondents"
-  ) +
   theme(
     axis.ticks.y = element_blank(),
     axis.text.y = element_blank(),
     axis.text = element_text(size=12),
     axis.title = element_blank(),
     legend.position = "none")+
-  scale_fill_manual(values = rep("royalblue",50))
+  scale_fill_manual(values = rep("royalblue",50)) 
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/org_type.png",device = "png",width=7,height=4,bg="transparent")
 
 #job function
 df %>%
@@ -72,8 +75,6 @@ df %>%
   geom_text(aes(label=n),hjust=-.3,size=3.5) +
   coord_cartesian(xlim=c(0,60)) +
   coord_flip() +
-  labs(title="Job functions of respondents"
-  ) +
   theme(
     axis.ticks.x = element_blank(),
     axis.text.x = element_blank(),
@@ -82,42 +83,48 @@ df %>%
     legend.position = "none") +
   scale_fill_manual(values = rep("royalblue",50))
 
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/jobfunction.png",device = "png",width=8,height=5,bg="transparent")
+
 #role
 df %>%
   count(role) %>%
-  ggplot(aes(x=reorder(role,n),y=n)) +
+  drop_na(role) %>%
+  ggplot(aes(x=reorder(role,n),y=n,fill="place")) +
   geom_bar(stat='identity') +
   geom_text(aes(label=n),hjust=-.3,size=3.5) +
   coord_cartesian(xlim=c(0,60)) +
   coord_flip() +
-  labs(title="Job functions of respondents"
-  ) +
   theme(
     axis.ticks.x = element_blank(),
     axis.text.x = element_blank(),
     axis.text = element_text(size=10),
-    axis.title = element_blank())
+    axis.title = element_blank(),
+    legend.position = "none")+
+  scale_fill_manual(values = rep("royalblue",50))
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/role.png",device = "png",width=7,height=4,bg="transparent")
 
 #job function + role
 df %>%
   select(contains("job_function"),id,role) %>%
   pivot_longer(contains("job_function")) %>%
-  drop_na(value) %>%
+  drop_na(value,name,role) %>%
   group_by(role) %>%
   count(value) %>%
   ggplot(aes(x=reorder(value,n),y=n,fill=role)) +
   geom_bar(stat='identity') +
-#  geom_text(aes(label=n),hjust=-.3,size=3.5) +
+  #  geom_text(aes(label=n),hjust=-.3,size=3.5) +
   coord_flip() +
-
-  labs(title="Job functions of respondents"
-  ) +
   theme(
     #axis.ticks.x = element_blank(),
     #axis.text.x = element_blank(),
     axis.text = element_text(size=10),
-    axis.title = element_blank())
+    axis.title = element_blank(),
+    legend.position = c(0.8, 0.4)) +
+  scale_fill_brewer(palette = "Spectral")
 
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/roleandjob.png",device = "png",width=7,height=4,bg="transparent")
 
 #data_center
 df %>%
@@ -140,6 +147,9 @@ df %>%
     legend.position = "none") +
   scale_fill_manual(values = rep("royalblue",50))
 
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/datacenter.png",device = "png",width=7,height=4,bg="transparent")
+
 #number of machines
 df %>%
   count(number_of_machines) %>%
@@ -149,15 +159,16 @@ df %>%
   geom_text(aes(label=n),hjust=-.3,size=3.5) +
   coord_cartesian(xlim=c(0,60)) +
   coord_flip() +
-  labs(title="Number of machines"
-  ) +
   theme(
     axis.ticks.x = element_blank(),
     axis.text.x = element_blank(),
     axis.text = element_text(size=10),
     axis.title = element_blank(),
     legend.position = "none") +
-  scale_fill_manual(values = rep("royalblue",50))
+    scale_fill_brewer(palette = "Spectral")
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/numberofmachines.png",device = "png",width=7,height=4,bg="transparent")
+
 
 #activities
 
@@ -171,12 +182,15 @@ df %>%
   group_by(name,value,total) %>%
   count() %>%
   mutate(prop=n/total) %>%
-  ggplot(aes(x=name,y=prop,fill=value)) +
+  ggplot(aes(x=reorder(name,n),y=prop,fill=value)) +
   geom_bar(stat='identity',position = "stack") +
   coord_flip() +
   scale_fill_futurama() +
   labs(x="",y="Proportion") +
   scale_x_discrete(labels = wrap_format(30))
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/activities.png",device = "png",width=7,height=4,bg="transparent")
+
 
 #container use
 
@@ -186,17 +200,24 @@ df %>%
   mutate(name=gsub("container_","",name)) %>%
   drop_na(value) %>%
   group_by(name) %>%
-  mutate(total=n(),
-         value=factor(value,levels = c("Used in the past","Currently using","Future plans","N/A"))) %>%
+  mutate(total=n()) %>%
+  ungroup() %>%
+  mutate(
+    value=factor(value,levels = c("Used in the past","Currently using","Future plans","N/A")),
+    name=factor(name,levels = c("Proof of concept","Development","Test","Production"))
+  ) %>%
   group_by(name,value,total) %>%
   count() %>%
   mutate(prop=n/total) %>%
   ggplot(aes(x=name,y=prop,fill=value)) +
-  geom_bar(stat='identity',position = "stack") +
+  geom_bar(stat='identity',position = "dodge") +
   coord_flip() +
   scale_fill_futurama() +
   labs(x="",y="Proportion") +
   scale_x_discrete(labels = wrap_format(30))
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/containeruse.png",device = "png",width=7,height=4,bg="transparent")
+
 
 #kubernetes use
 
@@ -215,10 +236,13 @@ df %>%
          name=factor(name,levels = c("Proof of concept","Development","Test","Production"))) %>%
   filter(name!="Other (please specify)") %>% #removed other response
   ggplot(aes(x=name,y=prop,fill=value)) +
-  geom_bar(stat='identity',position = "stack") +
+  geom_bar(stat='identity',position = "dodge") +
   coord_flip() +
   scale_fill_futurama() +
   labs(x="",y="Proportion") 
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/k8suse.png",device = "png",width=7,height=4,bg="transparent")
+
 
 #learn
 
@@ -242,6 +266,9 @@ df %>%
     axis.title = element_blank(),
     legend.position = "none") +
   scale_fill_manual(values = rep("royalblue",50))
+
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/learn.png",device = "png",width=7,height=4,bg="transparent")
+
 
 #nps
 
@@ -275,3 +302,4 @@ df %>%
   labs(y="Count",x="") +
   annotate("text", x = 2, y = 30, label = paste0("NPS score is ",nps_value))
 
+ggsave("/Users/carlpearson/Documents/r_github/sig-usability-survey/plots/nps.png",device = "png",width=7,height=4,bg="transparent")
